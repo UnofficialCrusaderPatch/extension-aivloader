@@ -1,9 +1,18 @@
 name: aivloader
 display-name: AIV Loader
-version: 1.0.0
+version: 1.0.1
 author: gynt, TheRedDaemon
 meta:
   version: 1.0.0
 type: module
 dependencies:
   files: ">= 0.0.1"
+tags:
+- ai
+- aiv
+- tools
+capabilities:
+  files: false
+  code: true
+  configuration: false
+  options: false
