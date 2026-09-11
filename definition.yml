@@ -11,8 +11,3 @@ tags:
 - ai
 - aiv
 - tools
-capabilities:
-  files: false
-  code: true
-  configuration: false
-  options: false
