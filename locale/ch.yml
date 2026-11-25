@@ -1,3 +1,5 @@
 tags.ai: 人工智能
 tags.aiv: AI 城堡
 tags.tools: 工具
+fair_castle_choice: '公平的 AI 城堡选择'
+fair_castle_choice_descr: '若多个城堡布局与 AI 起始位置同样契合，则用游戏的随机数从中选择一个。否则游戏大多选择第一个。'

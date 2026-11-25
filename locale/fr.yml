@@ -1,3 +1,5 @@
 tags.ai: IA
 tags.aiv: Châteaux IA
 tags.tools: Outils
+fair_castle_choice: 'Choix équitable du château IA'
+fair_castle_choice_descr: 'Si plusieurs plans de château conviennent aussi bien à la position de départ d’une IA, elle en choisit un au hasard avec le nombre aléatoire du jeu. Sinon, le jeu prend le plus souvent le premier.'

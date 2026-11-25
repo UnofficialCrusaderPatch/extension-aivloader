@@ -260,11 +260,81 @@ local function isInit()
   return init
 end
 
+local function nops(count)
+  local code = {}
+  for i = 1, count do
+    code[i] = 0x90
+  end
+  return code
+end
+
+-- fit score the game treats as a perfect fit (castle state 2)
+local PERFECT_FIT = 999999
+
+-- The game keeps the first best-fitting castle it meets, scanning from a random plan.
+-- This records every fit score and picks evenly among the best ones with the game's random byte.
+local function enableFairCastleChoice()
+  local found, rngPtr, scoreSite, chooseSite = pcall(function()
+    local _, rng = utils.AOBExtract("0F B6 05 I(? ? ? ?) 53 55 56 57 8B F9 83 E0 07")
+    return rng, core.AOBScan("3D 3F 42 0F 00 74 36"), core.AOBScan("7C 0A C7 43 14 01 00 00 00 89 43 10")
+  end)
+  if not found then
+    log(WARNING, "aivloader: castle choice code not found, fair castle choice stays off")
+    return
+  end
+
+  local fits = {}
+  local function resetFits()
+    for i = 1, 8 do
+      fits[i] = -1
+    end
+  end
+  resetFits()
+
+  -- reached only for scores > 0; replaces the perfect-fit early exit so every plan is scored
+  core.writeCode(scoreSite, nops(7))
+  core.detourCode(function(registers)
+    fits[registers.ESI + 1] = registers.EAX
+    return registers
+  end, scoreSite, 7)
+
+  -- replaces the game's write of its own choice (ebx + 0x10 castle, ebx + 0x14 fit state)
+  core.writeCode(chooseSite, nops(12))
+  core.detourCode(function(registers)
+    local best = 0
+    for i = 1, 8 do
+      if fits[i] > best then
+        best = fits[i]
+      end
+    end
+    if best > 0 then
+      local tied = {}
+      for i = 1, 8 do
+        if fits[i] == best then
+          tied[#tied + 1] = i - 1
+        end
+      end
+      local castle = tied[core.readByte(rngPtr) % #tied + 1]
+      core.writeInteger(registers.EBX + 0x10, castle)
+      core.writeInteger(registers.EBX + 0x14, best == PERFECT_FIT and 2 or 1)
+      if debugLog then
+        log(DEBUG, string.format("Fair castle choice: plan %d of %d tied (score %d)", castle + 1, #tied, best))
+      end
+    end
+    resetFits()
+    return registers
+  end, chooseSite, 9)
+end
+
 
 return {
   enable = function(self, config)
     debugLog = config.debugLog == true
-  
+
+    if config.fair_castle_choice == true then
+      enableFairCastleChoice()
+    end
+
     modules.files:registerOverrideFunction(function(fileName)
 
       if fileName:match("aiv\\.+.aiv$") then
@@ -281,8 +351,10 @@ return {
 
     hooks.registerHookCallback("afterInit", function()
       for ai, v in pairs(config) do
-        for castle, fileName in pairs(v) do
-          setAivForAi(ai, castle, fileName)
+        if type(v) == "table" then
+          for castle, fileName in pairs(v) do
+            setAivForAi(ai, castle, fileName)
+          end
         end
       end
     end)

@@ -1,0 +1,13 @@
+meta:
+  version: 1.0.0
+options:
+- name: fair_castle_choice
+  category:
+  - '{{tags.ai}}'
+  display: UCP2Switch
+  header: '{{fair_castle_choice}}'
+  text: '{{fair_castle_choice_descr}}'
+  url: aivloader.fair_castle_choice
+  contents:
+    type: boolean
+    value: false
