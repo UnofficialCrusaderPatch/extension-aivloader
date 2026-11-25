@@ -2,4 +2,4 @@ tags.ai: MI
 tags.aiv: MI-várak
 tags.tools: Eszközök
 fair_castle_choice: 'Igazságos MI-várválasztás'
-fair_castle_choice_descr: 'Ha több váralaprajz egyformán jól illik egy MI kezdőhelyéhez, a játék véletlenszámával választ közülük. Különben a játék többnyire az elsőt veszi.'
+fair_castle_choice_descr: 'Ha több váralaprajz egyformán jól illik egy MI kezdőhelyéhez, a játék véletlenszámával választ közülük. E nélkül a játék egyenlőségnél többnyire az elsőt veszi.'

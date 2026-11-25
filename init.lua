@@ -273,15 +273,32 @@ local PERFECT_FIT = 999999
 
 -- The game keeps the first best-fitting castle it meets, scanning from a random plan.
 -- This records every fit score and picks evenly among the best ones with the game's random byte.
+local function uniqueScan(pattern)
+  local address = core.scanForAOB(pattern)
+  if address == nil or address == 0 then
+    return nil
+  end
+  local second = core.scanForAOB(pattern, address + 1)
+  if second ~= nil and second ~= 0 then
+    return nil
+  end
+  return address
+end
+
 local function enableFairCastleChoice()
-  local found, rngPtr, scoreSite, chooseSite = pcall(function()
-    local _, rng = utils.AOBExtract("0F B6 05 I(? ? ? ?) 53 55 56 57 8B F9 83 E0 07")
-    return rng, core.AOBScan("3D 3F 42 0F 00 74 36"), core.AOBScan("7C 0A C7 43 14 01 00 00 00 89 43 10")
-  end)
-  if not found then
-    log(WARNING, "aivloader: castle choice code not found, fair castle choice stays off")
+  if modules["aiv-selector"] ~= nil then
+    log(WARNING, "aivloader: aiv-selector is active and provides fair castle choice, fair castle choice stays off")
     return
   end
+
+  local rngSite = uniqueScan("0F B6 05 ? ? ? ? 53 55 56 57 8B F9 83 E0 07")
+  local scoreSite = uniqueScan("3D 3F 42 0F 00 74 36")
+  local chooseSite = uniqueScan("7C 0A C7 43 14 01 00 00 00 89 43 10")
+  if rngSite == nil or scoreSite == nil or chooseSite == nil then
+    log(WARNING, "aivloader: castle choice code not found or not unique, fair castle choice stays off")
+    return
+  end
+  local rngPtr = core.readInteger(rngSite + 3)
 
   local fits = {}
   local function resetFits()
@@ -314,11 +331,12 @@ local function enableFairCastleChoice()
           tied[#tied + 1] = i - 1
         end
       end
-      local castle = tied[core.readByte(rngPtr) % #tied + 1]
+      local pick = core.readByte(rngPtr) % #tied + 1
+      local castle = tied[pick]
       core.writeInteger(registers.EBX + 0x10, castle)
       core.writeInteger(registers.EBX + 0x14, best == PERFECT_FIT and 2 or 1)
       if debugLog then
-        log(DEBUG, string.format("Fair castle choice: plan %d of %d tied (score %d)", castle + 1, #tied, best))
+        log(DEBUG, string.format("Fair castle choice: plan %d, tie %d of %d (score %d)", castle + 1, pick, #tied, best))
       end
     end
     resetFits()

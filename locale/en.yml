@@ -2,4 +2,4 @@ tags.ai: AI
 tags.aiv: AI castles
 tags.tools: Tools
 fair_castle_choice: 'Fair AI castle choice'
-fair_castle_choice_descr: 'If several castle layouts fit an AI''s start position equally well, it picks one of them at random with the game''s random number. Otherwise the game mostly picks the first one.'
+fair_castle_choice_descr: 'If several castle layouts fit an AI''s start position equally well, it picks one of them at random with the game''s random number. Without this option the game mostly picks the first of the tied layouts.'
