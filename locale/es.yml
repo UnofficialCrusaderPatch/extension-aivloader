@@ -1,0 +1,5 @@
+tags.ai: IA
+tags.aiv: Castillos de IA
+tags.tools: Herramientas
+fair_castle_choice: 'Elección justa de castillo IA'
+fair_castle_choice_descr: 'Si varios planos de castillo se ajustan igual de bien a la posición inicial de una IA, elige uno al azar con el número aleatorio del juego. Sin esta opción, el juego suele tomar el primero de los empatados.'
